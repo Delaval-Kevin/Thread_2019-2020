@@ -893,12 +893,12 @@ void* threadPacGom(void *p)
 	sigset_t mask;
 	sigfillset(&mask);
 	sigprocmask(SIG_SETMASK, &mask,NULL);
-	
-	pthread_mutex_lock(&mutexTab);	
+		
 	
 	while(1)
 	{
 		//On met les PacGom partout ou il n'y a pas de mur
+		pthread_mutex_lock(&mutexTab);
 		pthread_mutex_lock(&mutexNbPacGom);
 		
 		for(int i = 0 ; i < NB_LIGNE ; i++)
@@ -942,6 +942,9 @@ void* threadPacGom(void *p)
 		
 		DessineChiffre(14, 22, niveau);
 		
+		//Remettre le jeu en mode normal
+		Reset = false;
+		
 		//Attente qu'il n'y ai plus de PacGom
 		while(nbPacGom > 0)
 		{
@@ -969,9 +972,6 @@ void* threadPacGom(void *p)
 			}
 		}
 		
-		//Remettre le jeu en mode normal
-		Reset = false;
-		
 		//On enleve le threadTimeOut s'il y en avait un
 		if(!pthread_kill(tidTimeOut, 0))
 		{
@@ -997,8 +997,13 @@ void* threadPacGom(void *p)
 		delai = delai / 2;
 		pthread_mutex_unlock(&mutexDelai);	
 		
+		pthread_mutex_unlock(&mutexTab);
+		//Je force le procssus à lacher la main pour permettre aux fantomes de mourir
+		sched_yield();
+
 		//On envoie un signal pour recréer les fantomes du point de départ
 		pthread_cond_signal(&condNbFantomes);
+		
 	}
 }
 
