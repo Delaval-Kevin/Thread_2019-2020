@@ -969,6 +969,10 @@ void* threadPacGom(void *p)
 					pthread_kill(tab[i][j], SIGCHLD);
 					tab[i][j] = VIDE;
 				}
+				if(tab[i][j] == BONUS)
+				{
+					tab[i][j] = VIDE;
+				}
 			}
 		}
 		
